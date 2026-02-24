@@ -79,6 +79,37 @@ export const login = async (req, res, next) => {
 export const profile = (req, res) =>
   res.json({ error: false, usuario: req.usuario });
 
+// PUT /api/auth/profile - Privado
+// El usuario actualiza su propio nombre y/o email
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    const fields = {};
+    if (name) fields.name = name;
+    if (email) {
+      // Verificar que el email no lo use otro usuario
+      const existing = await User.findOne({ email, _id: { $ne: req.usuario._id } });
+      if (existing) {
+        return res.status(400).json({ error: true, mensaje: "Ese email ya está en uso" });
+      }
+      fields.email = email;
+    }
+
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({ error: true, mensaje: "Debes enviar al menos un campo para actualizar" });
+    }
+
+    const user = await User.findByIdAndUpdate(req.usuario._id, fields, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    res.json({ error: false, mensaje: "Perfil actualizado exitosamente", usuario: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // PUT /api/auth/change-password - Privado
 export const changePassword = async (req, res, next) => {
   try {

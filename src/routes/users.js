@@ -3,6 +3,7 @@ import {
   register,
   login,
   profile,
+  updateProfile,
   changePassword,
   forgotPassword,
   resetPassword,
@@ -10,7 +11,6 @@ import {
 import {
   getUsers,
   getUserById,
-  updateUser,
   deleteUser,
 } from "../controllers/users.js";
 import { validateJWT, checkRole } from "../middlewares/validateJWT.js";
@@ -18,7 +18,7 @@ import {
   registerValidations,
   loginValidations,
   validateMongoId,
-  updateUserValidations,
+  updateProfileValidations,
   changePasswordValidations,
   forgotPasswordValidations,
   resetPasswordValidations,
@@ -99,6 +99,34 @@ authRouter.post("/login", loginValidations, login);
  *         description: Perfil del usuario
  */
 authRouter.get("/profile", validateJWT, profile);
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   put:
+ *     summary: Actualizar nombre o email del usuario autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Juan Pérez Actualizado
+ *               email:
+ *                 type: string
+ *                 example: nuevo@email.com
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado
+ *       400:
+ *         description: Email ya en uso o sin cambios
+ */
+authRouter.put("/profile", validateJWT, updateProfileValidations, updateProfile);
 
 /**
  * @swagger
@@ -245,51 +273,7 @@ userRouter.get("/", validateJWT, checkRole("admin"), getUsers);
  *       200:
  *         description: Usuario encontrado
  */
-userRouter.get(
-  "/:id",
-  validateJWT,
-  checkRole("admin"),
-  validateMongoId,
-  getUserById,
-);
-
-/**
- * @swagger
- * /api/users/{id}:
- *   put:
- *     summary: Actualizar un usuario (solo admin)
- *     tags: [Users]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               rol:
- *                 type: string
- *                 enum: [comprador, vendedor, admin]
- *     responses:
- *       200:
- *         description: Usuario actualizado
- */
-userRouter.put(
-  "/:id",
-  validateJWT,
-  checkRole("admin"),
-  validateMongoId,
-  updateUserValidations,
-  updateUser,
-);
+userRouter.get("/:id", validateJWT, checkRole("admin"), validateMongoId, getUserById);
 
 /**
  * @swagger
@@ -309,10 +293,4 @@ userRouter.put(
  *       200:
  *         description: Usuario eliminado
  */
-userRouter.delete(
-  "/:id",
-  validateJWT,
-  checkRole("admin"),
-  validateMongoId,
-  deleteUser,
-);
+userRouter.delete("/:id", validateJWT, checkRole("admin"), validateMongoId, deleteUser);

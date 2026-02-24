@@ -55,33 +55,6 @@ export const getUserById = async (req, res, next) => {
   }
 };
 
-// PUT /api/users/:id - Privado (solo admin)
-export const updateUser = async (req, res, next) => {
-  try {
-    const { name, rol } = req.body;
-    const fields = {};
-    if (name) fields.name = name;
-    if (rol) fields.rol = rol;
-
-    const user = await User.findByIdAndUpdate(req.params.id, fields, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ error: true, mensaje: "Usuario no encontrado" });
-    }
-
-    res
-      .status(200)
-      .json({ error: false, mensaje: "Usuario actualizado", usuario: user });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // DELETE /api/users/:id - Privado (solo admin)
 export const deleteUser = async (req, res, next) => {
   try {

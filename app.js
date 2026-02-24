@@ -1,4 +1,4 @@
-import "dotenv/config"; // ⚠️ DEBE ser el primer import para que las env vars estén disponibles
+import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";

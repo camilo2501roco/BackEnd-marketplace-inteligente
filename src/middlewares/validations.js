@@ -118,25 +118,22 @@ export const changePasswordValidations = [
 ];
 
 // ─────────────────────────────────────────────
-// USER - Actualizar usuario (solo admin)
-// Solo permite cambiar name y rol
+// AUTH - Actualizar perfil propio
+// El usuario puede cambiar su nombre y/o email
 // ─────────────────────────────────────────────
-export const updateUserValidations = [
+export const updateProfileValidations = [
   body("name")
     .optional()
     .trim()
     .isLength({ min: 2, max: 100 })
     .withMessage("El nombre debe tener entre 2 y 100 caracteres"),
 
-  body("rol")
-    .optional()
-    .isIn(["comprador", "vendedor", "admin"])
-    .withMessage("Rol inválido. Opciones: comprador, vendedor, admin"),
-
   body("email")
-    .not()
-    .exists()
-    .withMessage("No se puede cambiar el email desde este endpoint"),
+    .optional()
+    .trim()
+    .isEmail()
+    .withMessage("El email no es válido")
+    .normalizeEmail(),
 
   body("password")
     .not()
