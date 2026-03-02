@@ -9,7 +9,10 @@ import {
   addReview,
 } from "../controllers/products.js";
 import { validateJWT, checkRole } from "../middlewares/validateJWT.js";
-import { validateMongoId } from "../middlewares/validations.js";
+import {
+  validateMongoId,
+  validateMongoIdParam,
+} from "../middlewares/validations.js";
 import {
   createProductValidations,
   updateProductValidations,
@@ -116,7 +119,11 @@ router.get("/", getProducts);
  *       200:
  *         description: Productos del vendedor
  */
-router.get("/seller/:sellerId", validateMongoId, getProductsBySeller);
+router.get(
+  "/seller/:sellerId",
+  validateMongoIdParam("sellerId"),
+  getProductsBySeller,
+);
 
 /**
  * @swagger

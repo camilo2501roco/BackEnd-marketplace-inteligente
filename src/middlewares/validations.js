@@ -28,6 +28,15 @@ export const validateMongoId = [
   validateFields,
 ];
 
+// Factory para validar cualquier parámetro MongoID
+// Uso: validateMongoIdParam('sellerId'), validateMongoIdParam('productId'), etc.
+export const validateMongoIdParam = (paramName = "id") => [
+  param(paramName)
+    .isMongoId()
+    .withMessage(`El ${paramName} proporcionado no es válido`),
+  validateFields,
+];
+
 // ─────────────────────────────────────────────
 // AUTH - Registro
 // ─────────────────────────────────────────────

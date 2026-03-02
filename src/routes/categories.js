@@ -60,7 +60,7 @@ router.post(
   checkRole("admin"),
   uploadCategoryImage.single("image"),
   createCategoryValidations,
-  createCategory
+  createCategory,
 );
 
 /**
@@ -143,7 +143,7 @@ router.post(
   validateJWT,
   checkRole("admin"),
   suggestSimilarValidations,
-  suggestSimilarCategories
+  suggestSimilarCategories,
 );
 
 /**
@@ -206,7 +206,7 @@ router.put(
   validateMongoId,
   uploadCategoryImage.single("image"),
   updateCategoryValidations,
-  updateCategory
+  updateCategory,
 );
 
 /**
@@ -231,13 +231,19 @@ router.put(
  *       404:
  *         description: Categoría no encontrada
  */
-router.delete("/:id", validateJWT, checkRole("admin"), validateMongoId, deleteCategory);
+router.delete(
+  "/:id",
+  validateJWT,
+  checkRole("admin"),
+  validateMongoId,
+  deleteCategory,
+);
 
 /**
  * @swagger
  * /api/categories/{id}/products:
  *   get:
- *     summary: Obtener productos de una categoría con estadísticas (público)
+ *     summary: Obtener productos de una categoría con estadsiticas (público)
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -278,7 +284,7 @@ router.post(
   validateJWT,
   checkRole("admin"),
   validateMongoId,
-  generateCategoryDescription
+  generateCategoryDescription,
 );
 
 /**
@@ -308,7 +314,7 @@ router.post(
   validateJWT,
   checkRole("admin"),
   validateMongoId,
-  analyzeCategoryProducts
+  analyzeCategoryProducts,
 );
 
 export default router;

@@ -26,7 +26,7 @@ app.use("/uploads", express.static("uploads"));
 connectDB();
 
 // Swagger - Documentación
-app.use("/api-docs", ...swaggerUi.serve, swaggerUi.setup(specs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // Rutas
 app.get("/", (req, res) => {

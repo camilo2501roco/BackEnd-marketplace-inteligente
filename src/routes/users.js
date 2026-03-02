@@ -8,11 +8,7 @@ import {
   forgotPassword,
   resetPassword,
 } from "../controllers/auth.js";
-import {
-  getUsers,
-  getUserById,
-  deleteUser,
-} from "../controllers/users.js";
+import { getUsers, getUserById, deleteUser } from "../controllers/users.js";
 import { validateJWT, checkRole } from "../middlewares/validateJWT.js";
 import {
   registerValidations,
@@ -126,7 +122,12 @@ authRouter.get("/profile", validateJWT, profile);
  *       400:
  *         description: Email ya en uso o sin cambios
  */
-authRouter.put("/profile", validateJWT, updateProfileValidations, updateProfile);
+authRouter.put(
+  "/profile",
+  validateJWT,
+  updateProfileValidations,
+  updateProfile,
+);
 
 /**
  * @swagger
@@ -259,7 +260,7 @@ userRouter.get("/", validateJWT, checkRole("admin"), getUsers);
  * @swagger
  * /api/users/{id}:
  *   get:
- *     summary: Obtener un usuario por ID (solo admin)
+ *     summary: Obtener un usuario por ID (admin y usuarios)
  *     tags: [Users]
  *     security:
  *       - BearerAuth: []
@@ -273,7 +274,13 @@ userRouter.get("/", validateJWT, checkRole("admin"), getUsers);
  *       200:
  *         description: Usuario encontrado
  */
-userRouter.get("/:id", validateJWT, checkRole("admin"), validateMongoId, getUserById);
+userRouter.get(
+  "/:id",
+  validateJWT,
+  checkRole("admin", "comprador", "vendedor"),
+  validateMongoId,
+  getUserById,
+);
 
 /**
  * @swagger
@@ -293,4 +300,10 @@ userRouter.get("/:id", validateJWT, checkRole("admin"), validateMongoId, getUser
  *       200:
  *         description: Usuario eliminado
  */
-userRouter.delete("/:id", validateJWT, checkRole("admin"), validateMongoId, deleteUser);
+userRouter.delete(
+  "/:id",
+  validateJWT,
+  checkRole("admin"),
+  validateMongoId,
+  deleteUser,
+);

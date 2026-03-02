@@ -82,7 +82,7 @@ export const getProductById = async (req, res, next) => {
         .json({ error: true, mensaje: "Producto no encontrado" });
     }
 
-    res.status(200).json({ error: false, producto: product });
+    res.status(200).json({ producto: product });
   } catch (error) {
     next(error);
   }
@@ -96,7 +96,7 @@ export const getProductsBySeller = async (req, res, next) => {
       .populate("category_id", "name")
       .lean();
 
-    res.status(200).json({ error: false, productos: products });
+    res.status(200).json({ productos: products });
   } catch (error) {
     next(error);
   }
@@ -187,7 +187,7 @@ export const deleteProduct = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ error: false, mensaje: "Producto eliminado exitosamente" });
+      .json({ mensaje: "Producto eliminado exitosamente" });
   } catch (error) {
     next(error);
   }

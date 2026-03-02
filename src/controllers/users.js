@@ -49,7 +49,8 @@ export const getUserById = async (req, res, next) => {
         .json({ error: true, mensaje: "Usuario no encontrado" });
     }
 
-    res.status(200).json({ error: false, usuario: user });
+    res.status(200).json({ 
+      usuario: user });
   } catch (error) {
     next(error);
   }
@@ -68,7 +69,7 @@ export const deleteUser = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ error: false, mensaje: "Usuario eliminado exitosamente" });
+      .json({ mensaje: "Usuario eliminado exitosamente" });
   } catch (error) {
     next(error);
   }

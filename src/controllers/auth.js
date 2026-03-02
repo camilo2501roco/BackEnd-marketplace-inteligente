@@ -23,10 +23,9 @@ export const register = async (req, res, next) => {
     const token = generateJWT(user._id);
 
     res.status(201).json({
-      error: false,
       mensaje: "Usuario registrado exitosamente",
       usuario: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         rol: user.rol,
@@ -60,10 +59,9 @@ export const login = async (req, res, next) => {
     const token = generateJWT(user._id);
 
     res.json({
-      error: false,
       mensaje: "Inicio de sesión exitoso",
       usuario: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         rol: user.rol,
@@ -77,7 +75,7 @@ export const login = async (req, res, next) => {
 
 // GET /api/auth/profile - Privado
 export const profile = (req, res) =>
-  res.json({ error: false, usuario: req.usuario });
+  res.json({ usuario: req.usuario });
 
 // PUT /api/auth/profile - Privado
 // El usuario actualiza su propio nombre y/o email
@@ -104,7 +102,7 @@ export const updateProfile = async (req, res, next) => {
       runValidators: true,
     }).select("-password");
 
-    res.json({ error: false, mensaje: "Perfil actualizado exitosamente", usuario: user });
+    res.json({ mensaje: "Perfil actualizado exitosamente", usuario: user });
   } catch (error) {
     next(error);
   }
@@ -127,7 +125,7 @@ export const changePassword = async (req, res, next) => {
     user.password = await bcrypt.hash(new_password, 10);
     await user.save();
 
-    res.json({ error: false, mensaje: "Contraseña actualizada exitosamente" });
+    res.json({ mensaje: "Contraseña actualizada exitosamente" });
   } catch (error) {
     next(error);
   }
@@ -144,7 +142,6 @@ export const forgotPassword = async (req, res, next) => {
     // Por seguridad respondemos igual aunque el email no exista
     if (!user) {
       return res.json({
-        error: false,
         mensaje: "Si el email existe recibirás un código de recuperación",
       });
     }
@@ -161,7 +158,6 @@ export const forgotPassword = async (req, res, next) => {
     await sendResetCode(email, code);
 
     res.json({
-      error: false,
       mensaje: "Si el email existe recibirás un código de recuperación",
     });
   } catch (error) {
@@ -206,7 +202,7 @@ export const resetPassword = async (req, res, next) => {
     user.reset_code_expires = null;
     await user.save();
 
-    res.json({ error: false, mensaje: "Contraseña actualizada exitosamente" });
+    res.json({ mensaje: "Contraseña actualizada exitosamente" });
   } catch (error) {
     next(error);
   }

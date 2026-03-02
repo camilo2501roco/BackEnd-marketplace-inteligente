@@ -7,12 +7,13 @@ import fs from "fs";
 export const createCategory = async (req, res, next) => {
   try {
     const { name, description } = req.body;
-    const imagen_icono = req.file ? `/uploads/categories/${req.file.filename}` : null;
+    const imagen_icono = req.file
+      ? `/uploads/categories/${req.file.filename}`
+      : null;
 
     const category = await Category.create({ name, description, imagen_icono });
 
     res.status(201).json({
-      error: false,
       mensaje: "Categoría creada exitosamente",
       categoria: category,
     });
@@ -25,7 +26,15 @@ export const createCategory = async (req, res, next) => {
 // Query: q (búsqueda), sortBy, order, page, limit, from, to
 export const getCategories = async (req, res, next) => {
   try {
-    const { q, sortBy = "creation_date", order = "desc", page = 1, limit = 10, from, to } = req.query;
+    const {
+      q,
+      sortBy = "creation_date",
+      order = "desc",
+      page = 1,
+      limit = 10,
+      from,
+      to,
+    } = req.query;
 
     const filter = {};
 
@@ -46,7 +55,9 @@ export const getCategories = async (req, res, next) => {
     // Ordenamiento: desc = -1, asc = 1
     const sortOrder = order === "asc" ? 1 : -1;
     const validSortFields = ["name", "creation_date"];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : "creation_date";
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : "creation_date";
 
     const [categories, total] = await Promise.all([
       Category.find(filter)
@@ -57,7 +68,6 @@ export const getCategories = async (req, res, next) => {
     ]);
 
     res.status(200).json({
-      error: false,
       total,
       page: parsedPage,
       total_pages: Math.ceil(total / parsedLimit),
@@ -74,10 +84,12 @@ export const getCategoryById = async (req, res, next) => {
     const category = await Category.findById(req.params.id);
 
     if (!category) {
-      return res.status(404).json({ error: true, mensaje: "Categoría no encontrada" });
+      return res
+        .status(404)
+        .json({ error: true, mensaje: "Categoría no encontrada" });
     }
 
-    res.status(200).json({ error: false, categoria: category });
+    res.status(200).json({ categoria: category });
   } catch (error) {
     next(error);
   }
@@ -107,10 +119,17 @@ export const updateCategory = async (req, res, next) => {
     });
 
     if (!category) {
-      return res.status(404).json({ error: true, mensaje: "Categoría no encontrada" });
+      return res
+        .status(404)
+        .json({ error: true, mensaje: "Categoría no encontrada" });
     }
 
-    res.status(200).json({ error: false, mensaje: "Categoría actualizada", categoria: category });
+    res
+      .status(200)
+      .json({
+        mensaje: "Categoría actualizada",
+        categoria: category,
+      });
   } catch (error) {
     next(error);
   }
@@ -122,11 +141,15 @@ export const deleteCategory = async (req, res, next) => {
     const category = await Category.findById(req.params.id);
 
     if (!category) {
-      return res.status(404).json({ error: true, mensaje: "Categoría no encontrada" });
+      return res
+        .status(404)
+        .json({ error: true, mensaje: "Categoría no encontrada" });
     }
 
     // Verificamos si tiene productos asociados
-    const productCount = await Product.countDocuments({ category_id: req.params.id });
+    const productCount = await Product.countDocuments({
+      category_id: req.params.id,
+    });
     if (productCount > 0) {
       return res.status(400).json({
         error: true,
@@ -142,7 +165,9 @@ export const deleteCategory = async (req, res, next) => {
 
     await Category.findByIdAndDelete(req.params.id);
 
-    res.status(200).json({ error: false, mensaje: "Categoría eliminada exitosamente" });
+    res
+      .status(200)
+      .json({ mensaje: "Categoría eliminada exitosamente" });
   } catch (error) {
     next(error);
   }
@@ -154,22 +179,23 @@ export const getCategoryProducts = async (req, res, next) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
-      return res.status(404).json({ error: true, mensaje: "Categoría no encontrada" });
+      return res
+        .status(404)
+        .json({ error: true, mensaje: "Categoría no encontrada" });
     }
 
     const products = await Product.find({ category_id: req.params.id })
       .populate("seller_id", "name email")
       .lean();
 
-    // Estadísticas
     const total = products.length;
-    const avgPrice = total > 0 ? products.reduce((sum, p) => sum + p.price, 0) / total : 0;
+    const avgPrice =
+      total > 0 ? products.reduce((sum, p) => sum + p.price, 0) / total : 0;
     const minPrice = total > 0 ? Math.min(...products.map((p) => p.price)) : 0;
     const maxPrice = total > 0 ? Math.max(...products.map((p) => p.price)) : 0;
     const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
 
     res.status(200).json({
-      error: false,
       categoria: category.name,
       estadisticas: {
         total_productos: total,
@@ -191,7 +217,9 @@ export const generateCategoryDescription = async (req, res, next) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
-      return res.status(404).json({ error: true, mensaje: "Categoría no encontrada" });
+      return res
+        .status(404)
+        .json({ error: true, mensaje: "Categoría no encontrada" });
     }
 
     const model = getGeminiModel();
@@ -207,7 +235,6 @@ export const generateCategoryDescription = async (req, res, next) => {
     const description = result.response.text();
 
     res.status(200).json({
-      error: false,
       categoria: category.name,
       descripcion_generada: description,
     });
@@ -242,7 +269,6 @@ export const suggestSimilarCategories = async (req, res, next) => {
       .map((s) => s.trim());
 
     res.status(200).json({
-      error: false,
       categorias_sugeridas: suggestions,
     });
   } catch (error) {
@@ -256,7 +282,9 @@ export const analyzeCategoryProducts = async (req, res, next) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
-      return res.status(404).json({ error: true, mensaje: "Categoría no encontrada" });
+      return res
+        .status(404)
+        .json({ error: true, mensaje: "Categoría no encontrada" });
     }
 
     const products = await Product.find({ category_id: req.params.id }).lean();
@@ -296,14 +324,16 @@ Responde SOLO con el JSON, sin texto adicional.`;
     let analisis;
     try {
       // Limpiar posibles bloques de código markdown
-      const cleaned = responseText.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+      const cleaned = responseText
+        .replace(/```json?\n?/g, "")
+        .replace(/```/g, "")
+        .trim();
       analisis = JSON.parse(cleaned);
     } catch {
       analisis = { resumen: responseText.trim() };
     }
 
     res.status(200).json({
-      error: false,
       categoria: category.name,
       total_productos: products.length,
       analisis,

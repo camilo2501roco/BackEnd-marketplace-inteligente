@@ -50,6 +50,8 @@ const router = Router();
  *         description: Orden creada exitosamente
  *       400:
  *         description: Stock insuficiente o datos inválidos
+ *       404:
+ *         description: Producto no encontrado
  */
 router.post(
   "/",
@@ -63,21 +65,45 @@ router.post(
  * @swagger
  * /api/orders:
  *   get:
- *     summary: Listar órdenes (comprador ve las suyas, admin ve todas)
+ *     summary: Listar órdenes
+ *     description: >
+ *       Comprador ve sus propias órdenes.
+ *       Vendedor ve las órdenes que contienen sus productos.
+ *       Admin ve todas.
  *     tags: [Orders]
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
  *     responses:
  *       200:
  *         description: Lista de órdenes
  */
-router.get("/", validateJWT, checkRole("comprador", "admin"), getOrders);
+router.get(
+  "/",
+  validateJWT,
+  checkRole("comprador", "vendedor", "admin"),
+  getOrders,
+);
 
 /**
  * @swagger
  * /api/orders/{id}:
  *   get:
  *     summary: Obtener una orden por ID
+ *     description: >
+ *       Comprador solo ve sus órdenes.
+ *       Vendedor solo ve órdenes con sus productos.
+ *       Admin ve cualquier orden.
  *     tags: [Orders]
  *     security:
  *       - BearerAuth: []
@@ -91,14 +117,14 @@ router.get("/", validateJWT, checkRole("comprador", "admin"), getOrders);
  *       200:
  *         description: Orden encontrada
  *       403:
- *         description: No tienes permiso para ver esta orden
+ *         description: Sin permiso para ver esta orden
  *       404:
  *         description: Orden no encontrada
  */
 router.get(
   "/:id",
   validateJWT,
-  checkRole("comprador", "admin"),
+  checkRole("comprador", "vendedor", "admin"),
   validateMongoId,
   getOrderById,
 );
@@ -107,7 +133,11 @@ router.get(
  * @swagger
  * /api/orders/{id}/status:
  *   put:
- *     summary: Actualizar estado de una orden (solo admin)
+ *     summary: Avanzar el estado de una orden (solo vendedor)
+ *     description: >
+ *       El vendedor solo puede avanzar el estado hacia adelante.
+ *       Flujo válido: pendiente → confirmada → enviada → entregada.
+ *       No puede cancelar ni retroceder estados.
  *     tags: [Orders]
  *     security:
  *       - BearerAuth: []
@@ -127,18 +157,22 @@ router.get(
  *             properties:
  *               estado:
  *                 type: string
- *                 enum: [pendiente, confirmada, enviada, entregada, cancelada]
+ *                 enum: [confirmada, enviada, entregada]
  *                 example: confirmada
  *     responses:
  *       200:
- *         description: Estado actualizado
+ *         description: Estado actualizado exitosamente
+ *       400:
+ *         description: Transición de estado inválida
+ *       403:
+ *         description: No tienes productos en esta orden
  *       404:
  *         description: Orden no encontrada
  */
 router.put(
   "/:id/status",
   validateJWT,
-  checkRole("admin"),
+  checkRole("vendedor"),
   validateMongoId,
   updateOrderStatusValidations,
   updateOrderStatus,
@@ -148,7 +182,10 @@ router.put(
  * @swagger
  * /api/orders/{id}/cancel:
  *   put:
- *     summary: Cancelar una orden (solo el comprador dueño, si está pendiente)
+ *     summary: Cancelar una orden (solo comprador dueño)
+ *     description: >
+ *       Solo se puede cancelar si la orden está en estado "pendiente".
+ *       Al cancelar, el stock de cada producto se restaura automáticamente.
  *     tags: [Orders]
  *     security:
  *       - BearerAuth: []
@@ -160,11 +197,13 @@ router.put(
  *           type: string
  *     responses:
  *       200:
- *         description: Orden cancelada exitosamente
+ *         description: Orden cancelada y stock restaurado
  *       400:
- *         description: No se puede cancelar en este estado
+ *         description: Solo se pueden cancelar órdenes pendientes
  *       403:
  *         description: No puedes cancelar una orden que no es tuya
+ *       404:
+ *         description: Orden no encontrada
  */
 router.put(
   "/:id/cancel",

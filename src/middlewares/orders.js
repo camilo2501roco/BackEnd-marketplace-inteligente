@@ -29,14 +29,14 @@ export const createOrderValidations = [
   validateFields,
 ];
 
-// Actualizar estado de orden
+// Actualizar estado de orden (solo vendedor, solo estados hacia adelante)
 export const updateOrderStatusValidations = [
   body("estado")
     .notEmpty()
     .withMessage("El estado es obligatorio")
-    .isIn(["pendiente", "confirmada", "enviada", "entregada", "cancelada"])
+    .isIn(["confirmada", "enviada", "entregada"])
     .withMessage(
-      "Estado inválido. Opciones: pendiente, confirmada, enviada, entregada, cancelada",
+      "Estado inválido. El vendedor solo puede avanzar a: confirmada, enviada, entregada",
     ),
 
   validateFields,
